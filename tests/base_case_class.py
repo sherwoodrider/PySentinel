@@ -6,6 +6,7 @@ import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.mysql.sql_class import DatabaseManager
 from src.test_result.result import TestResult
 
 
@@ -14,8 +15,19 @@ class BaseTest:
     def setup_method(self, driver,test_log_handle):
         """在每个测试方法之前运行，注入 driver"""
         self.driver = driver  # 将 driver 注入到类中
-        self.test_log = test_log_handle  # 假设 test_log_handle 是一个夹具
-    def ask_question(self,question):
+        self.test_log = test_log_handle
+        # self.db_manager = DatabaseManager()
+
+    def check_keyword_relevance(self, question, answer):
+        try:
+            keywords = set(question.split())
+            relevant = any(keyword in answer for keyword in keywords)
+            return relevant
+        except Exception as e:
+            print(e)
+            self.test_log.log_critical(e)
+
+    def ask_question(self,question, timeout=90):
         try:
             if self.driver is None:
                 error_info = "self.driver is None"
@@ -28,7 +40,34 @@ class BaseTest:
             # 点击发送按钮
             button = self.driver.find_element(By.CLASS_NAME, "f6d670")
             button.click()
-            time.sleep(60)
+
+            # 动态等待答案生成
+            try:
+                # 等待直到新的回答出现
+                WebDriverWait(self.driver, timeout).until(
+                    lambda driver: len(driver.find_elements(By.CLASS_NAME, "ds-markdown--block")) > 0
+                )
+                # 等待回答完全输出完毕
+                last_answer_length = 0
+                start_time = time.time()
+                while True:
+                    answers = self.driver.find_elements(By.CLASS_NAME, "ds-markdown--block")
+                    current_answer = answers[-1].text
+
+                    # 如果回答长度不再变化，说明回答已完成
+                    if len(current_answer) == last_answer_length:
+                        break
+                    # 如果超时，抛出异常
+                    if time.time() - start_time > timeout:
+                        raise TimeoutError("Answer generation timed out")
+
+                    last_answer_length = len(current_answer)
+                    time.sleep(1)  # 每隔1秒检查一次
+
+            except Exception as e:
+                self.test_log.log_error(f"Timeout while waiting for answer: {e}")
+                raise TimeoutError("Answer generation timed out")
+
             # 获取最新的回答
             answers = self.driver.find_elements(By.CLASS_NAME, "ds-markdown--block")
             answer = answers[-1].text
@@ -40,14 +79,7 @@ class BaseTest:
         except Exception as e:
             self.test_log.log_error(f"Attempt failed: {e}")
 
-    def check_keyword_relevance(self, question, answer):
-        try:
-            keywords = set(question.split())
-            relevant = any(keyword in answer for keyword in keywords)
-            return relevant
-        except Exception as e:
-            print(e)
-            self.test_log.log_critical(e)
+
 
     def calculate_semantic_similarity(self, question, answer):
         try:

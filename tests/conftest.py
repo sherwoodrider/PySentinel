@@ -7,10 +7,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from selenium.webdriver.support import expected_conditions as EC
 def print_case_name(func):
-    def wrapper(test_env):
-        test_env.test_log.log_info('enter {}()'.format(func.__name__))
-        result = func(test_env)
-        test_env.test_log.log_info('quit {}()'.format(func.__name__))
+    def wrapper(self):
+        self.test_log.log_info('enter {}()'.format(func.__name__))
+        result = func(self)
+        self.test_log.log_info('quit {}()'.format(func.__name__))
         return result
     return wrapper
 
@@ -47,7 +47,7 @@ def driver(test_log_handle, config_file):
         if "deep_seek" not in config_file or not all(k in config_file["deep_seek"] for k in ["login_name", "password"]):
             pytest.fail("配置文件中缺少 DeepSeek 登录信息")
         driver = webdriver.Chrome()
-        login(driver, config_file["deep_seek"]["login_name"], config_file["deep_seek"]["password"])
+        login(driver,test_log_handle, config_file)
         # 提供 driver 给测试使用
         yield driver
     except Exception as e:

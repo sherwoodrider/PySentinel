@@ -3,11 +3,8 @@ import os
 import datetime
 import pytest
 from selenium.webdriver.common.by import By
-
 from src.test_log.logger import TestLog
 from src.test_result.result import TestResult
-
-
 
 
 @pytest.fixture(scope="session")
