@@ -21,6 +21,8 @@ def db_connection(config_file):
     CREATE TABLE IF NOT EXISTS test_results (
         id INT AUTO_INCREMENT PRIMARY KEY,
         test_case_name VARCHAR(255) NOT NULL,
+        question VARCHAR(500) NOT NULL,
+        answer TEXT NOT NULL,
         result VARCHAR(50) NOT NULL,
         crash INT,
         fail_info VARCHAR(255) NOT NULL,

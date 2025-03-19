@@ -3,6 +3,8 @@ import os
 import datetime
 import pytest
 from selenium.webdriver.common.by import By
+
+from src.mysql.sql_class import DatabaseManager
 from src.test_log.logger import TestLog
 from src.test_result.result import TestResult
 
@@ -39,7 +41,7 @@ def log_folder():
         # import shutil
         # shutil.rmtree(test_log_folder)
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def test_log_handle(log_folder):
     now = datetime.datetime.now()
     str_now = now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -50,8 +52,24 @@ def test_log_handle(log_folder):
 
 
 @pytest.fixture(scope="session")
+def data_base():
+    db_manager = DatabaseManager()
+    yield db_manager
+
+@pytest.fixture(scope="session")
 def test_result_handle(log_folder):
     test_result = TestResult(log_folder)
     yield test_result
+
+@pytest.fixture(autouse=True)
+def log_test_case(request, test_log_handle):
+    test_name = request.node.name
+    test_log_handle.log_info(f"Enter {test_name}() *****")
+    # 在测试用例结束后记录退出
+    def finalizer():
+        test_log_handle.log_info(f"Quit {test_name}() *****")
+    request.addfinalizer(finalizer)
+
+
 
 

@@ -12,11 +12,11 @@ from src.test_result.result import TestResult
 
 @pytest.mark.usefixtures("driver", "test_log_handle")
 class BaseTest:
-    def setup_method(self, driver,test_log_handle):
-        """在每个测试方法之前运行，注入 driver"""
+    @pytest.fixture(autouse=True)
+    def init_fixture(self, driver,test_log_handle,data_base):
         self.driver = driver  # 将 driver 注入到类中
         self.test_log = test_log_handle
-        # self.db_manager = DatabaseManager()
+        self.db_manager = data_base
 
     def check_keyword_relevance(self, question, answer):
         try:
@@ -36,37 +36,39 @@ class BaseTest:
             # 输入问题
             question_input = self.driver.find_element(By.ID, "chat-input")
             question_input.send_keys(question)
-            time.sleep(2)  # 等待输入完成
+            time.sleep(10)  # 等待输入完成
             # 点击发送按钮
             button = self.driver.find_element(By.CLASS_NAME, "f6d670")
             button.click()
 
-            # 动态等待答案生成
-            try:
-                # 等待直到新的回答出现
-                WebDriverWait(self.driver, timeout).until(
-                    lambda driver: len(driver.find_elements(By.CLASS_NAME, "ds-markdown--block")) > 0
-                )
-                # 等待回答完全输出完毕
-                last_answer_length = 0
-                start_time = time.time()
-                while True:
-                    answers = self.driver.find_elements(By.CLASS_NAME, "ds-markdown--block")
-                    current_answer = answers[-1].text
+            time.sleep(30)  # 等待答案
 
-                    # 如果回答长度不再变化，说明回答已完成
-                    if len(current_answer) == last_answer_length:
-                        break
-                    # 如果超时，抛出异常
-                    if time.time() - start_time > timeout:
-                        raise TimeoutError("Answer generation timed out")
-
-                    last_answer_length = len(current_answer)
-                    time.sleep(1)  # 每隔1秒检查一次
-
-            except Exception as e:
-                self.test_log.log_error(f"Timeout while waiting for answer: {e}")
-                raise TimeoutError("Answer generation timed out")
+            # # 动态等待答案生成
+            # try:
+            #     # 等待直到新的回答出现
+            #     WebDriverWait(self.driver, timeout).until(
+            #         lambda driver: len(driver.find_elements(By.CLASS_NAME, "ds-markdown--block")) > 0
+            #     )
+            #     # 等待回答完全输出完毕
+            #     last_answer_length = 0
+            #     start_time = time.time()
+            #     while True:
+            #         answers = self.driver.find_elements(By.CLASS_NAME, "ds-markdown--block")
+            #         current_answer = answers[-1].text
+            #
+            #         # 如果回答长度不再变化，说明回答已完成
+            #         if len(current_answer) == last_answer_length:
+            #             break
+            #         # 如果超时，抛出异常
+            #         if time.time() - start_time > timeout:
+            #             raise TimeoutError("Answer generation timed out")
+            #
+            #         last_answer_length = len(current_answer)
+            #         time.sleep(1)  # 每隔1秒检查一次
+            #
+            # except Exception as e:
+            #     self.test_log.log_error(f"Timeout while waiting for answer: {e}")
+            #     raise TimeoutError("Answer generation timed out")
 
             # 获取最新的回答
             answers = self.driver.find_elements(By.CLASS_NAME, "ds-markdown--block")
@@ -78,7 +80,6 @@ class BaseTest:
             return answer  # 返回有效的回答
         except Exception as e:
             self.test_log.log_error(f"Attempt failed: {e}")
-
 
 
     def calculate_semantic_similarity(self, question, answer):
