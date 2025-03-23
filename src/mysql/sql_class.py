@@ -1,21 +1,16 @@
 import pytest
-@pytest.mark.usefixtures("test_log_handle", "db_cursor", "db_connection")
+
 class DatabaseManager():
-    @pytest.fixture(autouse=True)
-    def init_fixture(self,test_log_handle,db_cursor,db_connection):
+    def __init__(self,test_log_handle,db_cursor,db_connection):
         self.test_log = test_log_handle
         self.db_cursor = db_cursor
         self.db_connection = db_connection
 
-    # def __init__(self, test_log_handle, db_cursor, db_connection):
-    #     self.test_log = test_log_handle
-    #     self.db_cursor = db_cursor
-    #     self.db_connection = db_connection
     def insert(self,case_name,question,answer,test_result,crash,fail_info):
         try:
             self.test_log.log_info("[DatabaseManager]:insert begin")
             # 将结果插入数据库
-            sql = "INSERT INTO test_results (test_case_name, question,answer,result,crash,fail_info) VALUES (%s, %s)"
+            sql = "INSERT INTO test_results (test_case_name, question,answer,result,crash,fail_info) VALUES (%s, %s, %s, %s, %s, %s)"
             values = (case_name,question,answer, test_result, crash, fail_info)
             self.db_cursor.execute(sql, values)
             self.db_connection.commit()

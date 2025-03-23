@@ -1,15 +1,35 @@
 import mysql.connector
 import pytest
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def db_connection(config_file):
-    # 连接到 MySQL 服务器
+    # host=config_file.get("mysql", "host"),
+    # port=config_file.get("mysql", "port"),
+    # user=config_file.get("mysql", "user"),
+    # password=config_file.get("mysql", "password")
+    # print("host type: {}".format(type(host)))
+    # print("host value: {}".format(str(host)))
+    # print("port type: {}".format(type(port)))
+    # print("port value: {}".format(str(port)))
+    # print("user type: {}".format(type(user)))
+    # print("user value: {}".format(str(user)))
+    # print("password type: {}".format(type(password)))
+    # print("password value: {}".format(str(password)))
+
     conn = mysql.connector.connect(
-        host=config_file.get("mysql","host"),
+        host=config_file.get("mysql", "host"),
         port=config_file.get("mysql", "port"),
-        user=config_file.get("mysql","user"),
-        password=config_file.get("mysql","password")
+        user=config_file.get("mysql", "user"),
+        password=config_file.get("mysql", "password")
     )
+    # 连接到 MySQL 服务器
+    # conn = mysql.connector.connect(
+    #     host="localhost",
+    #     port="3306",
+    #     user="root",
+    #     password="123456"
+    # )
+
     cursor = conn.cursor()
 
     # 创建数据库
@@ -40,7 +60,7 @@ def db_connection(config_file):
     conn.close()
 
 # Fixture: 获取数据库游标
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def db_cursor(db_connection):
     cursor = db_connection.cursor()
     yield cursor

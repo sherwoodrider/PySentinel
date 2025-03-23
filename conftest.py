@@ -4,6 +4,7 @@ import datetime
 import pytest
 from selenium.webdriver.common.by import By
 
+from src.mysql.conftest import db_cursor, db_connection
 from src.mysql.sql_class import DatabaseManager
 from src.test_log.logger import TestLog
 from src.test_result.result import TestResult
@@ -52,8 +53,8 @@ def test_log_handle(log_folder):
 
 
 @pytest.fixture(scope="session")
-def data_base():
-    db_manager = DatabaseManager()
+def data_base(test_log_handle, db_connection, db_cursor):
+    db_manager = DatabaseManager(test_log_handle, db_cursor, db_connection)
     yield db_manager
 
 @pytest.fixture(scope="session")
