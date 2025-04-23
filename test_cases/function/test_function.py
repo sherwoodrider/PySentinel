@@ -4,12 +4,11 @@ from test_cases.base_case_class import BaseTest
 
 
 class Test_Fuction(BaseTest):
-    #1. 测试AI对简单中文问题的回答
     def test_simple_chinese_question(self):
         try:
             question =  "今天是星期几"
             answer = "星期六"
-            # answer = self.ask_question(question)
+            answer = self.ask_question(question)
             test_result = "pass"
             crash = 0
             fail_info = ""
@@ -26,7 +25,6 @@ class Test_Fuction(BaseTest):
             self.db_manager.query(case_name)
         except Exception as e:
             self.test_log.log_critical(e)
-    #2. 测试AI对复杂问题的回答
     @pytest.mark.skip()
     def test_complex_question(self,test_log_handle):
         try:

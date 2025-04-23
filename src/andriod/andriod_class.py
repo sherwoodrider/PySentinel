@@ -8,7 +8,7 @@ class AndriodDevice():
         # 使用 AppiumOptions 定义 Desired Capabilities
         self.options = UiAutomator2Options()
         self.options.platform_name = "Android"
-        self.options.platform_version = "4.1.16"  # 根据 MuMu 模拟器的 Android 版本填写
+        self.options.platform_version = "12"  # 根据 MuMu 模拟器的 Android 版本填写
         # self.options.device_name = "127.0.0.1:7555"  # MuMu 模拟器的 ADB 地址
         self.options.device_name = device_id  # MuMu 模拟器的 ADB 地址
         self.options.app_package = "tv.danmaku.bili"  # 哔哩哔哩的包名
@@ -84,9 +84,9 @@ class SamsongS9080(AndriodDevice):
 if __name__ == '__main__':
     device_id = "127.0.0.1:7555"
     sam  = SamsongS9080(device_id)
-    # sam.driver_start()
-    # sam.play_blibli()
-    sam.play_blibli_u2()
+    sam.driver_start()
+    sam.play_blibli()
+    # sam.play_blibli_u2()
 
 
 

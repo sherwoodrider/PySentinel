@@ -21,8 +21,8 @@ def login(driver,test_log_handle,config_file):
         # password_input.send_keys(config_file["deep_seek"]["password"])
         username_input.send_keys(config_file.get("deep_seek","login_name"))
         password_input.send_keys(config_file.get("deep_seek","password"))
-        checkbox = driver.find_element(By.CLASS_NAME, "ds-checkbox")#勾选同意
-        checkbox.click()
+        # checkbox = driver.find_element(By.CLASS_NAME, "ds-checkbox")#勾选同意
+        # checkbox.click()
         login_input = driver.find_element(By.XPATH, "//div[text()='登录']")  # 点击登录
         login_input.click()
         time.sleep(5)  # 等待登录完成
