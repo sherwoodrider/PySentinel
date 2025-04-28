@@ -6,7 +6,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from selenium.webdriver.support import expected_conditions as EC
-
+import re
+from playwright.sync_api import Playwright, sync_playwright, expect, Page
+from typing import AsyncGenerator
 def login(driver,test_log_handle,config_file):
     try:
         # 打开 DeepSeek 登录页面
@@ -50,3 +52,26 @@ def driver(test_log_handle, config_file):
         # 确保 driver 被正确关闭
         if driver:
             driver.quit()
+
+@pytest.fixture(scope="session")
+def browser_page(config_file):
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=False)
+        page = browser.new_page()
+        page.goto("https://chat.deepseek.com/sign_in")
+        page.get_by_text("密码登录").click()
+        page.get_by_role("textbox", name="请输入手机号/邮箱地址").fill(config_file.get("deep_seek","login_name"))
+        page.get_by_role("textbox", name="请输入密码").fill(config_file.get("deep_seek","password"))
+        page.get_by_role("button", name="登录").click()
+        # page.wait_for_selector("[role='textbox'][name='给 DeepSeek 发送消息']")
+        yield page
+        browser.close()
+
+def ask_question(page: Page, question: str) -> str:
+    input_box = page.get_by_role("textbox", name="给 DeepSeek 发送消息")
+    input_box.click()
+    input_box.fill(question)
+    page.get_by_role("button").filter(has_text=re.compile(r"^$")).click()
+    page.wait_for_selector(".ds-flex > .ds-flex > div")
+    answer = page.locator(".ds-markdown--block").last.text_content()
+    return answer
