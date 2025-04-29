@@ -1,5 +1,8 @@
 import pytest
 import time
+
+import pytest_asyncio
+from playwright.async_api import async_playwright,Page
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,7 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from selenium.webdriver.support import expected_conditions as EC
 import re
-from playwright.sync_api import Playwright, sync_playwright, expect, Page
+from playwright.sync_api import Playwright, sync_playwright,expect, Page
 from typing import AsyncGenerator
 def login(driver,test_log_handle,config_file):
     try:
@@ -53,7 +56,7 @@ def driver(test_log_handle, config_file):
         if driver:
             driver.quit()
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def browser_page(config_file):
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=False)
@@ -74,4 +77,26 @@ def ask_question(page: Page, question: str) -> str:
     page.get_by_role("button").filter(has_text=re.compile(r"^$")).click()
     page.wait_for_selector(".ds-flex > .ds-flex > div")
     answer = page.locator(".ds-markdown--block").last.text_content()
+    return answer
+@pytest_asyncio.fixture(scope="function")
+async def logged_in_page(config_file):
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch()
+        page = await browser.new_page()
+        await page.goto("https://chat.deepseek.com/sign_in")
+        await page.get_by_text("密码登录").click()
+        await page.get_by_role("textbox", name="请输入手机号/邮箱地址").fill(config_file.get("deep_seek","login_name"))
+        await page.get_by_role("textbox", name="请输入密码").fill(config_file.get("deep_seek","password"))
+        await page.get_by_role("button", name="登录").click()
+        # await page.wait_for_selector("给 DeepSeek 发送消息",timeout=5000)
+        yield page
+        await browser.close()
+
+async def ask_question_async(page, question: str) -> str:
+    input_box = page.get_by_role("textbox", name="给 DeepSeek 发送消息")
+    await input_box.click()
+    await input_box.fill(question)
+    await page.get_by_role("button").filter(has_text=re.compile(r"^$")).click()
+    await page.wait_for_selector(".ds-flex > .ds-flex > div")
+    answer = await page.locator(".ds-markdown--block").last.text_content()
     return answer
