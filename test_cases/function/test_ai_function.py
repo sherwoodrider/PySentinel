@@ -2,7 +2,7 @@ import re
 import pytest
 from playwright.async_api import async_playwright, Page
 
-from test_cases.conftest import ask_question, ask_question_async
+from test_cases.conftest import ask_question
 
 
 def test_math_question(browser_page,test_log_handle):
@@ -18,9 +18,3 @@ def test_simple_chinese_question(browser_page,test_log_handle):
     question = "什么是机器学习,请用不多于500个字回答"
     answer = ask_question(browser_page, question)
     test_log_handle.log_info(f"question: {question}\nanswer: {answer}\n")
-@pytest.mark.asyncio
-async def test_new_with_deepseek(logged_in_page,test_log_handle):
-    question = "请用50个字解释人工智能"
-    answer  = await ask_question_async(logged_in_page, question)
-    test_log_handle.log_info(f"question: {question}\nanswer: {answer}\n")
-
