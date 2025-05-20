@@ -12,6 +12,10 @@ from selenium.webdriver.support import expected_conditions as EC
 import re
 from playwright.sync_api import Playwright, sync_playwright,expect, Page
 from typing import AsyncGenerator
+
+from src.model.check_relevance import ResponseJudger
+
+
 def login(driver,test_log_handle,config_file):
     try:
         # 打开 DeepSeek 登录页面
@@ -78,6 +82,15 @@ def ask_question(page: Page, question: str) -> str:
     page.wait_for_selector(".ds-flex > .ds-flex > div")
     answer = page.locator(".ds-markdown--block").last.text_content()
     return answer
+
+def check_relevance(question, answer):
+    try:
+        rj = ResponseJudger(question,answer)
+        result = rj.second_examine()
+        return  result
+    except Exception as e:
+        print(e)
+
 @pytest_asyncio.fixture(scope="function")
 async def logged_in_page(config_file):
     async with async_playwright() as playwright:

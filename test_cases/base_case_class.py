@@ -6,6 +6,7 @@ import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.model.check_relevance import ResponseJudger
 from src.mysql.sql_class import DatabaseManager
 from src.test_result.result import TestResult
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,9 +21,9 @@ class BaseTest:
 
     def check_keyword_relevance(self, question, answer):
         try:
-            keywords = set(question.split())
-            relevant = any(keyword in answer for keyword in keywords)
-            return relevant
+            rj = ResponseJudger(question,answer)
+            result = rj.second_examine()
+            return  result
         except Exception as e:
             print(e)
             self.test_log.log_critical(e)
@@ -53,52 +54,3 @@ class BaseTest:
         except Exception as e:
             self.test_log.log_error(f"Attempt failed: {e}")
 
-
-    def calculate_semantic_similarity(self, question, answer):
-        try:
-            # 使用TF-IDF计算语义相似度
-            vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform([question, answer])
-            similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-
-            # 设置相似度阈值
-            if similarity > 0.5:  # 阈值可根据实际情况调整
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(e)
-            self.test_log.log_critical(e)
-            return False
-
-    def check_robustness(self, question, answer):
-        try:
-            # 使用TF-IDF计算语义相似度
-            vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform([question, answer])
-            similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-
-            # 设置较低的相似度阈值以容忍噪声
-            if similarity > 0.3:  # 阈值可根据实际情况调整
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(e)
-            self.test_log.log_critical(e)
-            return False
-
-    def check_performance(self, response_time, resource_usage):
-        try:
-            # 定义性能阈值
-            max_response_time = 5  # 最大响应时间（秒）
-            max_memory_usage = 100 * 1024 * 1024  # 最大内存占用（100MB）
-
-            if response_time <= max_response_time and resource_usage <= max_memory_usage:
-                return True  # 性能达标
-            else:
-                return False  # 性能不达标
-        except Exception as e:
-            print(e)
-            self.test_log.log_critical(e)
-            return False

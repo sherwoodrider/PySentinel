@@ -38,7 +38,7 @@ class DeepSeekApi():
         try:
             # current_folder_path = os.getcwd()
             # config_file_path = os.path.join(current_folder_path, "../config/test_config.ini")
-            config_file_path = "../config/test_config.ini"
+            config_file_path = r"D:\code_repo\PySentinel\src\config\test_config.ini"
             config = configparser.ConfigParser()
             config.read(config_file_path)
             self.authorization =  config.get("deep_seek","api_key")
