@@ -2,7 +2,7 @@ import re
 import pytest
 from playwright.async_api import async_playwright, Page
 
-from test_cases.conftest import ask_question, check_relevance, ask_question_async
+from test_cases.conftest import ask_question, check_relevance, ask_question_async,ask_question_by_api
 
 
 def test_math_question(browser_page,test_log_handle):
@@ -28,3 +28,10 @@ async def test_new_with_deepseek(logged_in_page,test_log_handle):
     question = "请用50个字解释人工智能"
     answer  = await ask_question_async(logged_in_page, question)
     test_log_handle.log_info(f"question: {question}\nanswer: {answer}\n")
+
+def test_super_hero_questions(ask_question_by_api,test_log_handle):
+    question = "中国有超级英雄么，用不超过50个字回答我"
+    answer = ask_question_by_api(question)
+    test_log_handle.log_info(f"question: {question}\nanswer: {answer}\n")
+    result = check_relevance(question, answer)
+    assert result == True

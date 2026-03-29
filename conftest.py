@@ -4,6 +4,7 @@ import datetime
 import pytest
 from selenium.webdriver.common.by import By
 
+from src.deep_seek_api.api import DeepSeekApi
 from src.mysql.conftest import db_cursor, db_connection
 from src.mysql.sql_class import DatabaseManager
 from src.test_log.logger import TestLog
@@ -70,6 +71,11 @@ def log_test_case(request, test_log_handle):
     def finalizer():
         test_log_handle.log_info(f"Quit {test_name}() *****")
     request.addfinalizer(finalizer)
+
+@pytest.fixture(scope="session")
+def deep_seek_api():
+    api = DeepSeekApi()
+    yield api
 
 
 

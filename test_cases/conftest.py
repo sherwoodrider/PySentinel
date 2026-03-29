@@ -13,6 +13,7 @@ import re
 from playwright.sync_api import Playwright, sync_playwright,expect, Page
 from typing import AsyncGenerator
 
+from conftest import deep_seek_api
 from src.model.check_relevance import ResponseJudger
 
 
@@ -113,3 +114,6 @@ async def ask_question_async(page, question: str) -> str:
     await page.wait_for_selector(".ds-flex > .ds-flex > div")
     answer = await page.locator(".ds-markdown--block").last.text_content()
     return answer
+@pytest_asyncio.fixture(scope="function")
+def ask_question_by_api(deep_seek_api,question: str):
+    deep_seek_api.ask_question(question)
