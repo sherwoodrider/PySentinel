@@ -1,0 +1,14 @@
+# 忽略 Python 编译缓存
+__pycache__/
+*.py[cod]
+.idea/*
+# 忽略虚拟环境
+venv/
+.env/
+
+# 忽略日志文件
+*.log
+
+# 忽略临时文件
+*.tmp
+*.swp
