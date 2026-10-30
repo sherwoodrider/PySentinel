@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "desc": "数据驱动的问答语料。新增用例只需在此追加一条，无需写新函数。",
+    "filter": "按 category / tags 在命令行筛选：-k math，或 -m 'not slow'"
+  },
+  "cases": [
+    {
+      "id": "math_quadratic",
+      "question": "求解方程x^2 - 4 = 0",
+      "category": "math",
+      "max_answer_chars": 500,
+      "tags": ["reasoning", "math"]
+    },
+    {
+      "id": "ml_basic",
+      "question": "什么是机器学习,请用不多于500个字回答",
+      "category": "concept",
+      "max_answer_chars": 500,
+      "tags": ["concept"]
+    },
+    {
+      "id": "ai_brief",
+      "question": "请用50个字解释人工智能",
+      "category": "concept",
+      "max_answer_chars": 100,
+      "tags": ["concept", "brief"]
+    },
+    {
+      "id": "noise_robustness",
+      "question": "什么是人工@智能？,请用不多于500个字回答",
+      "category": "robustness",
+      "max_answer_chars": 500,
+      "tags": ["robustness", "noise"]
+    }
+  ]
+}
