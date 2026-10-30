@@ -11,7 +11,8 @@ class RAGConfig:
 
     # LM Studio 配置
     LM_STUDIO_URL = "http://localhost:1234"
-    LLM_MODEL_NAME = "deepseek/deepseek-r1-0528-qwen3-8b"
+    # LLM_MODEL_NAME = "deepseek/deepseek-r1-0528-qwen3-8b"
+    LLM_MODEL_NAME = "google/gemma-4-e4b"
     EMBEDDING_MODEL_NAME = "text-embedding-nomic-embed-text-v1.5"
 
     # 分块参数

@@ -1,14 +1,30 @@
-# 忽略 Python 编译缓存
+# ---------- Python ----------
 __pycache__/
 *.py[cod]
+*.egg-info/
 .idea/*
-# 忽略虚拟环境
+.vscode/
+
+# ---------- 虚拟环境 ----------
 venv/
+.venv/
 .env/
 
-# 忽略日志文件
+# ---------- 运行产物 ----------
+logs/
 *.log
+.pytest_cache/
+allure-results/
+allure-report/
+.cache/
+snapshots/
+*.html
 
-# 忽略临时文件
+# ---------- 配置与密钥（切勿提交） ----------
+src/config/test_config.ini
+!src/config/test_config.example.ini
+
+# ---------- 临时文件 ----------
 *.tmp
 *.swp
+.DS_Store

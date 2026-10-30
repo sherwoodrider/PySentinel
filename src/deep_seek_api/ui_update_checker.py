@@ -7,17 +7,22 @@ import re
 
 from src.deep_seek_api.api import DeepSeekApi
 from playwright.sync_api import Playwright, sync_playwright,expect, Page
+from src.config.settings import PROJECT_ROOT
 
 from src.deep_seek_api.check_error import ai_analyze_error
 
 
 class UiChecker:
-    def __init__(self,old_code_path, url="https://chat.deepseek.com/sign_in", output_path="snapshot"):
+    """UI 变更自愈：快照 DOM → diff → 交给 LLM 重写失效 selector。
+
+    路径默认基于项目根目录解析，不再依赖 Windows 绝对路径。
+    """
+    def __init__(self,old_code_path, url="https://chat.deepseek.com/sign_in", output_path=None):
         self.url = url
-        self.api = DeepSeekApi()
-        self.old_code_path = old_code_path
-        self.update_folder_path = os.path.dirname(old_code_path)
-        self.output_path = output_path
+        self.api = DeepSeekApi.default()
+        self.old_code_path = os.path.abspath(old_code_path)
+        self.update_folder_path = os.path.dirname(self.old_code_path)
+        self.output_path = os.path.abspath(output_path or os.path.join(PROJECT_ROOT, "snapshots"))
         os.makedirs(self.output_path, exist_ok=True)
     @ai_analyze_error
     def snapshot_ui_structure(self):
@@ -71,8 +76,10 @@ class UiChecker:
         with open(self.old_code_path, 'r', encoding='utf-8') as f:
             old_code = f.read()
         prompt = self.api.ui_uodate_prompt(old_code, removed_ui, added_ui)
-        self.api.ask_question(prompt)
-        answer = self.api.get_answer()
+        answer = self.api.ask_question(prompt)
+        if not answer:
+            print("[UiChecker] AI 未返回内容，跳过代码更新")
+            return None
         new_code = self.get_code_from_answer(answer)
         # os.makedirs(self.update_folder_path, exist_ok=True)
         file_name = os.path.basename(self.old_code_path).replace(".py", "_updated.py")
@@ -80,12 +87,13 @@ class UiChecker:
         new_code_path = os.path.join(update_folder_path,file_name)
         self.write_py_file(new_code_path,new_code)
         print(f"code is already saved in : {new_code_path}")
+        return new_code_path
 
 if __name__ == "__main__":
-    old_code_path = r"D:\code_repo\PySentinel\test_cases\conftest.py"
+    old_code_path = os.path.join(PROJECT_ROOT, "test_cases", "conftest.py")
     url = "https://chat.deepseek.com/sign_in"
-    output_path = r"D:\code_repo\PySentinel\src\deep_seek_api\snapshot"
-    u_c  = UiChecker(old_code_path)
+    output_path = os.path.join(PROJECT_ROOT, "snapshots")
+    u_c  = UiChecker(old_code_path, url=url, output_path=output_path)
     u_c.snapshot_ui_structure()
     snapshots = sorted(os.listdir(output_path))
     if len(snapshots) < 2:
